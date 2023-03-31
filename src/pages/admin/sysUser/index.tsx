@@ -174,7 +174,7 @@ function Page() {
     const _res: IConstant[] = []
     if (data.data) {
         for (let i=0;i<data.data.length;i++) {
-          const item: IConstant = {label: data.data[i]['roleName'] as string, value: data.data[i]['roleId'] as unknown as number}
+          const item: IConstant = {label: data.data[i]['roleName'] as string, value: data.data[i]['id'] as unknown as number}
           _res.push(item)
         }
       setRoles(_res)
@@ -188,7 +188,7 @@ function Page() {
     const _res: IConstant[] =[]
     if (data.data) {
       for (let i=0;i<data.data.length;i++) {
-        const item: IConstant = { label: data.data[i]['deptName'] as string, value: data.data[i]['deptId'] as unknown as number}
+        const item: IConstant = { label: data.data[i]['deptName'] as string, value: data.data[i]['id'] as unknown as number}
         _res.push(item)
       }
       setDept(_res)
