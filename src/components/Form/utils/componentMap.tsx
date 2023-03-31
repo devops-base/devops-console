@@ -22,6 +22,8 @@ import BasicTimeRangePicker from '@/components/Dates/BasicTimeRangePicker'
 import PasswordStrength from '@/components/PasswordStrength'
 import WangEditor from '@/components/WangEditor'
 import BasicTransfer from "@/components/Transfer/BasicTransfer"
+import BasicTree from "@/components/Tree/BasicTree"
+const { TextArea } = Input;
 
 const componentMap = new Map()
 
@@ -48,6 +50,8 @@ componentMap.set('ApiTreeSelect', ApiTreeSelect)
 componentMap.set('PasswordStrength', PasswordStrength)
 componentMap.set('Editor', WangEditor)
 componentMap.set('Transfer', BasicTransfer)
+componentMap.set('Tree', BasicTree)
+componentMap.set('Textarea', TextArea)
 
 // 业务组件注入
 // CreateBusiness()

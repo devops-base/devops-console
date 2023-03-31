@@ -79,9 +79,9 @@ function Header() {
         dispatch(clearInfo())
         dispatch(closeAllTab())
         dispatch(setActiveKey(''))
-        console.log('userinfo=>',username)
         removeToken()
-        clear() // 清除keepalive缓存
+        clear()
+           .then(r =>{}) // 清除keepalive缓存
         navigate('/login')
       }
     })

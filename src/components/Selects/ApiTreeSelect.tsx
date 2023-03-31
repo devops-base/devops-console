@@ -27,7 +27,6 @@ function ApiTreeSelect(props: IProps) {
     try {
       setLoading(true)
       const data = await props.api?.(props?.params)
-      console.log("tree=data==>", data)
       setOptions(data || [])
     } finally {
       setLoading(false)

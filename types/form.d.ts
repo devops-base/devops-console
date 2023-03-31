@@ -11,7 +11,7 @@ import type {
   CheckboxProps,
   SliderSingleProps,
   TimeRangePickerProps,
-  TransferProps
+  TransferProps,
 } from "antd"
 import type {Key, ReactElement, ReactNode} from "react"
 import type { IAllDataType } from './public'
@@ -20,6 +20,8 @@ import type { DefaultOptionType } from 'antd/lib/select'
 import type { RuleObject } from 'antd/lib/form'
 import type { IBusinessComponents } from '@/components/Business'
 import type { IEditorProps } from '@/components/WangEditor'
+import {TextAreaProps} from "antd/es/input"
+import {ITreeProps} from "@/components/Tree/BasicTree"
 
 // 数据类型
 export type IFormData = Record<string, IAllDataType>
@@ -53,6 +55,9 @@ type IRateComponents = 'Rate'
 // 穿梭俊组件
 type ITransfer = 'Transfer'
 
+// 搜索数
+type ITreeComponents  = 'Tree'
+
 // 滑动输入条组件
 type ISliderComponents = 'Slider'
 
@@ -80,6 +85,7 @@ export type IComponentType = IDefaultDataComponents |
                           TimeRangePickerProps |
                           RangePickerProps |
                           ITransfer |
+                          ITreeComponents |
                           IBusinessComponents
 
 export interface IApiResult extends Omit<DefaultOptionType, 'value'> {
@@ -114,12 +120,14 @@ export type IComponentProps = InputProps |
                               TimePickerProps |
                               UploadProps |
                               RateProps |
+                              TextAreaProps |
                               TimeRangePickerProps |
                               TransferProps |
                               RangePickerProps |
                               SliderSingleProps |
                               IApiSelectProps |
                               IApiTreeSelectProps |
+                              ITreeProps |
                               IEditorProps
 
 // 表单规则
