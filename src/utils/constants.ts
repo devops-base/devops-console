@@ -80,3 +80,21 @@ export const USER_STATUS: IConstant[] = [
   { label: '正常', value: '2'},
   { label: '停用', value: '1'}
 ]
+
+/**
+ * API接口请求类型
+ */
+export const API_ACTION_TYPES: IConstant[] = [
+  {label: 'GET', value: 'GET'},
+  {label: 'POST', value: 'POST'},
+  {label: 'PUT', value: 'PUT'},
+  {label: 'DELETE', value: 'DELETE'},
+]
+
+/**
+ * API 接口类型
+ */
+export const API_TYPES: IConstant[] = [
+  {label: 'SYS', value: 'SYS'},
+  {label: 'BUS', value: 'BUS'}
+]

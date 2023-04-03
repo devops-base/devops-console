@@ -42,13 +42,6 @@ export function valueToLable(value: string | number | boolean, arr: IConstant[])
   return ''
 }
 
-export  function valueToColor(value: string):string {
-  if (value == '1') {
-    return 'success'
-  }
-  return 'error'
-}
-
 /**
  * 获取url中参数某个值
  * @param search - url参数
@@ -145,4 +138,34 @@ export function recursiveData<T extends IRecursiveChildren<T>, U>(
   }
 
   return res
+}
+
+/**
+ * 根据请求类型返回tag颜色
+ */
+export function ApiActionHelper(value: string): string {
+  switch (value) {
+    case 'GET':
+      return 'green'
+    case 'PUT':
+      return 'orange'
+    case 'DELETE':
+      return 'red'
+    case 'POST':
+      return 'cyan'
+  }
+  return ''
+}
+
+/**
+ * 根据api类型返回颜色
+ */
+export function ApiTypeHelper(value: string): string {
+  switch (value) {
+    case 'SYS':
+      return 'green'
+    case 'BUS':
+      return 'cyan'
+  }
+  return ''
 }
