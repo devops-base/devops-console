@@ -127,7 +127,7 @@ function Login() {
           -translate-y-1/2
         `}>
          <div className="pb-20px flex items-center justify-center">
-            <span className="text-2xl font-bold tracking-2px">元数据系统</span>
+            <span className="text-2xl font-bold tracking-2px">后台管理系统</span>
           </div>
           <Form
             name="horizontal_login"

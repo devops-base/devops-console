@@ -5,7 +5,6 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { preloadPlugin } from './preload'
 import { timePlugin } from './time'
 import { cachePlugin } from './cache'
-import { imgMinPlugin } from './imgMin'
 import react from '@vitejs/plugin-react'
 import Unocss from 'unocss/vite'
 import viteCompression from 'vite-plugin-compression'
@@ -16,22 +15,20 @@ export function createVitePlugins() {
     react(),
     Unocss({
       presets: [
-        presetUno(), 
-        presetAttributify(), 
+        presetUno(),
+        presetAttributify(),
         presetIcons()
       ],
     }),
     // 包分析
     visualizer({
-      gzipSize: true, 
+      gzipSize: true,
       brotliSize: true,
     }),
     // 缓存策略
     cachePlugin(),
     // 打包时间
     timePlugin(),
-    // 图片压缩
-    imgMinPlugin(),
     // 压缩包
     viteCompression(),
     // 自动生成路由
