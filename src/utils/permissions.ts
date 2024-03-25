@@ -21,6 +21,25 @@ export const permissionsToArray = (permissions: IPermissions[]): string[] => {
 }
 
 /**
+ *  用户菜单参数转数组
+ * @param permissions - 授权值
+ */
+export const menusToArray = (permissions: IPermissions[]): string[] => {
+  const res: string[] = []
+  for (let i = 0; i < permissions.length; i++) {
+    if (permissions[i]?.children?.length > 0) {
+      const { children  } = permissions[i]
+      for (let y =0; y< children.length;y++) {
+        res.push(children[y].path)
+      }
+    } else {
+      res.push(permissions[i].path)
+    }
+  }
+  return res
+}
+
+/**
  * 检测是否有权限
  * @param value - 检测值
  * @param permissions - 权限

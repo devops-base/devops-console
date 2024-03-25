@@ -1,4 +1,5 @@
-import type { ISideMenu } from '#/public'
+import type { SideMenu } from '#/public'
+import {ADMIN_RULE} from "@/utils/config"
 
 /**
  * 根据路由获取展开菜单数组
@@ -8,7 +9,7 @@ export function getOpenMenuByRouter(router: string): string[] {
   const arr = splitPath(router), result: string[] = []
 
   // 取第一个单词大写为新展开菜单key
-  if (arr.length > 0) result.push(arr[0])
+  if (arr.length > 0) result.push(`/${arr[0]}`)
 
   // 当路由处于多级目录时
   if (arr.length > 2) {
@@ -69,20 +70,26 @@ export function splitPath(path: string): string[] {
  * @param currentPath - 当前路径
  * @param result - 返回值
  */
+export interface NavData {
+  label: string;
+  labelZh: string;
+  // labelEn: string;
+}
 
 interface IMenuPath {
   label: string;
   path: string[];
 }
+
 interface ISearchMenuProps {
-  menus: ISideMenu[] | undefined,
+  menus: SideMenu[] | undefined,
   permissions: string[],
   value: string,
   currentPath?: IMenuPath[],
-  result?: ISideMenu[]
+  result?: SideMenu[]
 }
 
-export function searchMenuValue(data: ISearchMenuProps): ISideMenu[] {
+export function searchMenuValue(data: ISearchMenuProps): SideMenu[] {
   const { menus, permissions, value } = data
   let { currentPath, result } = data
   if (!menus?.length || !value) return []
@@ -140,20 +147,21 @@ export function searchMenuValue(data: ISearchMenuProps): ISideMenu[] {
  * @param fatherNav - 父级面包屑
  * @param result - 返回值
  */
-interface IGetMenuByKeyResult {
+interface GetMenuByKeyResult {
   label: string;
+  labelZh: string;
   key: string;
-  nav: string[];
+  nav: NavData[];
 }
-interface IGetMenuByKeyProps {
-  menus: ISideMenu[] | undefined,
+interface GetMenuByKeyProps {
+  menus: SideMenu[] | undefined,
   permissions: string[],
   key: string,
-  fatherNav?: string[],
-  result?: IGetMenuByKeyResult
+  fatherNav?: NavData[],
+  result?: GetMenuByKeyResult
 }
 
-export function getMenuByKey(data: IGetMenuByKeyProps): IGetMenuByKeyResult | undefined {
+export function getMenuByKey(data: GetMenuByKeyProps): GetMenuByKeyResult | undefined {
   const { menus, permissions, key } = data
   let { fatherNav, result } = data
   if (!menus?.length) return result
@@ -161,24 +169,31 @@ export function getMenuByKey(data: IGetMenuByKeyProps): IGetMenuByKeyResult | un
   if (!result?.key) result = {
     key: '',
     label: '',
+    labelZh: '',
     nav: []
   }
 
   for (let i = 0; i < menus.length; i++) {
-    if (!key || (result as IGetMenuByKeyResult).key) return result
+    if (!key || (result as GetMenuByKeyResult).key) return result
+
+    const { label, children } = menus[i];
 
     // 过滤子数据中值
     if (hasChildren(menus[i])) {
-      fatherNav.push(menus[i].label)
+      fatherNav.push({
+        labelZh: label,
+        label: label
+      })
 
       // 递归子数组，返回结果
       const childProps = {
-        menus: menus[i].children,
+        menus: children,
         permissions,
         key,
         fatherNav,
         result
       }
+
       const childResult = getMenuByKey(childProps)
 
       // 当子数组返回值
@@ -192,9 +207,15 @@ export function getMenuByKey(data: IGetMenuByKeyProps): IGetMenuByKeyResult | un
       menus[i]?.key === key &&
       hasPermission(menus[i], permissions)
     ) {
-      fatherNav.push(menus[i].label)
       const { label, key } = menus[i]
-      if (key) result = { label, key, nav: fatherNav }
+      fatherNav.push({labelZh: label, label: label})
+      if (key) result =
+        {
+          label,
+          labelZh: label,
+          key,
+          nav: fatherNav
+        }
     }
   }
 
@@ -207,17 +228,17 @@ export function getMenuByKey(data: IGetMenuByKeyProps): IGetMenuByKeyResult | un
  * @param permissions - 权限列表
  */
 export function filterMenus(
-  menus: ISideMenu[],
+  menus: SideMenu[],
   permissions: string[]
-): ISideMenu[] {
-  const result: ISideMenu[] = []
+): SideMenu[] {
+  const result: SideMenu[] = []
   const newMenus = JSON.parse(JSON.stringify(menus))
 
   for (let i = 0; i < newMenus.length; i++) {
     // 处理子数组
     if (hasChildren(newMenus[i])) {
       const result = filterMenus(
-        newMenus[i].children as ISideMenu[],
+        newMenus[i].children as SideMenu[],
         permissions
       )
 
@@ -238,9 +259,10 @@ export function filterMenus(
  * 获取第一个有效权限路由
  * @param menus - 菜单
  * @param permissions - 权限
+ * @param result
  */
 export function getFirstMenu(
- menus: ISideMenu[],
+ menus: SideMenu[],
  permissions: string[],
  result = ''
 ): string {
@@ -251,7 +273,7 @@ export function getFirstMenu(
     // 处理子数组
     if (hasChildren(menus[i]) && !result) {
       const childResult = getFirstMenu(
-        menus[i].children as ISideMenu[],
+        menus[i].children as SideMenu[],
         permissions,
         result
       )
@@ -278,7 +300,10 @@ export function getFirstMenu(
  * @param route - 路由
  * @param permissions - 权限
  */
-function hasPermission(route: ISideMenu, permissions: string[]): boolean {
+function hasPermission(route: SideMenu, permissions: string[]): boolean {
+  if (permissions.includes(ADMIN_RULE)) { // 处理admin
+    return true
+  }
   return permissions?.includes(route?.rule || '')
 }
 
@@ -286,6 +311,6 @@ function hasPermission(route: ISideMenu, permissions: string[]): boolean {
  * 是否有子路由
  * @param route - 路由
  */
-function hasChildren(route: ISideMenu): boolean {
+function hasChildren(route: SideMenu): boolean {
   return Boolean(route.children?.length)
 }

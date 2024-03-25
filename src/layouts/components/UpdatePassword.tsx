@@ -50,10 +50,10 @@ function UpdatePassword(props: IProps) {
     }
     try {
       setLoading(true)
-      const { data } = await updatePassword(values)
-      if (data.code === 200) {
+      const resp = await updatePassword(values)
+      if (resp.code === 200) {
         setOpen(false)
-        message.success(data.message)
+        message.success(resp.message)
       }
     } finally {
       setLoading(false)

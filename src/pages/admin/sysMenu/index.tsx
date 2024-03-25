@@ -1,7 +1,7 @@
 import type { IFormData } from '#/form'
 import type { RootState } from '@/stores'
 import type { IPagePermission, ITableOptions } from '#/public'
-import type { IFormFn } from '@/components/Form/BasicForm'
+import type { FormFn } from '@/components/Form/BasicForm'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { searchList, createList, tableColumns } from './model'
 import {Button, message, RadioChangeEvent} from 'antd'
@@ -47,8 +47,8 @@ const initCreate = {
 
 function Page() {
   useTitle('菜单管理')
-  const searchFormRef = useRef<IFormFn>(null)
-  const createFormRef = useRef<IFormFn>(null)
+  const searchFormRef = useRef<FormFn>(null)
+  const createFormRef = useRef<FormFn>(null)
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [isLoading, setLoading] = useState(false)
   const [isCreateLoading, setCreateLoading] = useState(false)

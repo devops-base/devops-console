@@ -1,4 +1,6 @@
 // 接口传入数据
+import {SideMenu} from "#/public"
+
 export interface ILoginData {
   username: string;
   password: string;
@@ -37,7 +39,7 @@ export interface IPermissions {
 }
 
 // 接口返回数据
-export interface ILoginResult {
+export interface LoginResult {
   token: string;
   code: number;
   currentAuthority: string;
@@ -46,7 +48,7 @@ export interface ILoginResult {
 }
 
 // 验证码接口返回数据
-export  interface ICaptchaResult {
+export  interface CaptchaResult {
   code: number
   data: string;
   id: string;
@@ -55,7 +57,7 @@ export  interface ICaptchaResult {
 }
 
 // 用户信息接口返回数据
-export interface IUserInfoResult {
+export interface UserInfoResult {
   avatar: string;
   buttons: string[];
   deptId: number;
@@ -68,9 +70,8 @@ export interface IUserInfoResult {
 }
 
 // 用户权限接口返回数据
-export interface IUserPermission {
+export interface UserPermission {
   code: number;
-  data: IPermissions[];
+  data: SideMenu[];
   requestId: string;
 }
-

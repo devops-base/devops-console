@@ -2,7 +2,6 @@ import type { TabsProps } from 'antd'
 import type { AppDispatch, RootState } from '@/stores'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getMenuByKey } from '@/menus/utils/helper'
-import { defaultMenus } from '@/menus'
 import { message, Tabs, Dropdown } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAliveController } from 'react-activation'
@@ -20,6 +19,7 @@ import styles from '../index.module.less'
 import TabRefresh from './TabRefresh'
 import TabMaximize from './TabMaximize'
 import TabOptions from './TabOptions'
+import {useCommonStore} from "@/hooks/useCommonStore"
 
 function LayoutTabs() {
   const navigate = useNavigate()
@@ -30,12 +30,17 @@ function LayoutTabs() {
   const [time, setTime] = useState<null | NodeJS.Timeout>(null)
   const [refreshTime, seRefreshTime] = useState<null | NodeJS.Timeout>(null)
 
-  const tabs = useSelector((state: RootState) => state.tabs.tabs)
   const isLock = useSelector((state: RootState) => state.tabs.isLock)
   const activeKey = useSelector((state: RootState) => state.tabs.activeKey)
-  const permissions = useSelector((state: RootState) => state.user.menus)
   // 是否窗口最大化
-  const isMaximize = useSelector((state: RootState) => state.tabs.isMaximize)
+
+  const {
+    tabs,
+    permissions,
+    isMaximize,
+    menuList
+  } = useCommonStore();
+  const [messageApi, contextHolder] = message.useMessage();
 
   /**
    * 添加标签
@@ -46,7 +51,7 @@ function LayoutTabs() {
     if (permissions.length > 0) {
       if (path === '/') return
       const menuByKeyProps = {
-        menus: defaultMenus,
+        menus: menuList,
         permissions,
         key: path
       }
@@ -135,13 +140,14 @@ function LayoutTabs() {
     if (!time) {
       dispatch(setRefresh(true))
       refresh(key)
+        . then()
 
       setTime(
         setTimeout(() => {
-          message.success({
+          messageApi.success({
             content: '刷新成功',
             key: 'refresh'
-          })
+          }).then()
           dispatch(setRefresh(false))
           setTime(null)
         }, 100)
@@ -213,52 +219,54 @@ function LayoutTabs() {
   )
 
   return (
-    <div className={`
-      flex
-      items-center
-      justify-between
-      mx-2
-      transition-all
-      ${isMaximize ? styles.conMaximize : ''}
-    `}>
-      {
-        tabs.length > 0 ?
-        <Tabs
-          hideAdd
-          className="w-full h-30px py-0"
-          onChange={onChange}
-          activeKey={activeKey}
-          type="editable-card"
-          onEdit={onEdit}
-          items={tabs}
-          renderTabBar={renderTabBar}
-        />
-        : <span></span>
-      }
-
-      <div className='flex'>
+    <>
+      {contextHolder}
+      <div className={`
+        flex
+        items-center
+        justify-between
+        mx-2
+        transition-all
+        ${isMaximize ? styles.conMaximize : ''}
+      `}>
         {
-          tabOptions?.map((item, index) => (
-            <div
-              key={index}
-              className={`
-                ${styles.leftDivide}
-                change
-                divide-solid
-                w-36px
-                h-36px
-                hover:opacity-70
-                flex
-                place-content-center
-                items-center
-              `}
-            >
-              { item.element }
-            </div>
-          ))
+          tabs.length > 0 ?
+          <Tabs
+            hideAdd
+            className="w-full h-30px py-0"
+            onChange={onChange}
+            activeKey={activeKey}
+            type="editable-card"
+            onEdit={onEdit}
+            items={tabs}
+            renderTabBar={renderTabBar}
+          />
+          : <span></span>
         }
+        <div className='flex'>
+          {
+            tabOptions?.map((item, index) => (
+              <div
+                key={index}
+                className={`
+                  ${styles.leftDivide}
+                  change
+                  divide-solid
+                  w-36px
+                  h-36px
+                  hover:opacity-70
+                  flex
+                  place-content-center
+                  items-center
+                `}
+              >
+                { item.element }
+              </div>
+            ))
+          }
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

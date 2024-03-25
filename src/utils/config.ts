@@ -1,6 +1,8 @@
 /**
  * @description: 配置项
  */
+
+export const ADMIN_RULE = "*:*:*" // admin权限标识符
 export const TITLE_SUFFIX = '元数据系统' // 标题后缀
 export const TOKEN = 'x-token' // token名称
 export const WATERMARK_PREFIX = 'system' // 水印前缀

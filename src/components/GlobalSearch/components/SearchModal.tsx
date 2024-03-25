@@ -1,13 +1,12 @@
-import type { ISideMenu } from '#/public'
-import type { AppDispatch, RootState } from '@/stores'
+import type { SideMenu } from '#/public'
+import type { AppDispatch } from '@/stores'
 import type { InputProps, InputRef } from 'antd'
 import { Ref, useImperativeHandle, useLayoutEffect } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Modal, Input } from 'antd'
 import { Icon } from '@iconify/react'
 import { useDebounceFn } from 'ahooks'
-import { defaultMenus } from '@/menus'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useKeyStroke } from '@/hooks/useKeyStroke'
 import { getMenuByKey, getOpenMenuByRouter, searchMenuValue } from '@/menus/utils/helper'
@@ -15,6 +14,7 @@ import { addTabs, setActiveKey } from '@/stores/tabs'
 import { setOpenKeys } from '@/stores/menu'
 import SearchResult from './SearchResult'
 import SearchFooter from './SearchFooter'
+import {useCommonStore} from "@/hooks/useCommonStore"
 
 export interface ISearchModal {
   toggle: () => void;
@@ -30,10 +30,10 @@ function SearchModal(props: IProps) {
   const { modalRef } = props
   const [value, setValue] = useState('') // 输入框值
   const [active, setActive] = useState('') // 选中值
-  const [list, setList] = useState<ISideMenu[]>([])
+  const [list, setList] = useState<SideMenu[]>([])
   const [isOpen, setOpen] = useState(false)
   const dispatch: AppDispatch = useDispatch()
-  const permissions = useSelector((state: RootState) => state.user.menus)
+  const { permissions, menuList } = useCommonStore();
 
   // 抛出外部方法
   useImperativeHandle(
@@ -82,7 +82,7 @@ function SearchModal(props: IProps) {
     if (active) {
       navigate(active)
       // 添加标签
-      const menuByKeyProps = { menus: defaultMenus, permissions, key: active }
+      const menuByKeyProps = { menus: menuList, permissions, key: active }
       const newTab = getMenuByKey(menuByKeyProps)
       dispatch(addTabs(newTab))
       dispatch(setActiveKey(active))
@@ -99,11 +99,11 @@ function SearchModal(props: IProps) {
    * @param value - 搜索值
    */
   const debounceSearch = useDebounceFn((value: string) => {
-    const searchProps = { menus: defaultMenus, permissions, value }
+    const searchProps = { menus: menuList, permissions, value }
     const searchValue = searchMenuValue(searchProps)
     if (searchValue?.length) {
-      setActive((searchValue as ISideMenu[])?.[0]?.key || '')
-      setList(searchValue as ISideMenu[])
+      setActive((searchValue as SideMenu[])?.[0]?.key || '')
+      setList(searchValue as SideMenu[])
     } else {
       setActive('')
       setList([])

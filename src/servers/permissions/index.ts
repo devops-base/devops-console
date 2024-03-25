@@ -1,4 +1,4 @@
-import type { ILoginResult } from '@/pages/login/model'
+import type { LoginResult } from '@/pages/login/model'
 import type { IServerResult } from '#/public'
 import { request } from '@/utils/request'
 
@@ -7,7 +7,7 @@ import { request } from '@/utils/request'
  * @param data - 请求数据
  */
 export function getPermissions(data: unknown) {
-  return request.get<IServerResult<ILoginResult>>(
+  return request.get<IServerResult<LoginResult>>(
     '/base/user/refresh-permissions',
     { params: data }
   )

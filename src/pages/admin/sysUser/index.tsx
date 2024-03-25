@@ -1,6 +1,6 @@
 import type { IFormData } from '#/form'
 import type { IPagePermission, ITableOptions } from '#/public'
-import type { IFormFn } from '@/components/Form/BasicForm'
+import type { FormFn } from '@/components/Form/BasicForm'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createList, searchList, tableColumns } from './model'
 import {  message } from 'antd'
@@ -45,8 +45,8 @@ const initCreate = {
 
 function Page() {
   useTitle('用户管理')
-  const searchFormRef = useRef<IFormFn>(null)
-  const createFormRef = useRef<IFormFn>(null)
+  const searchFormRef = useRef<FormFn>(null)
+  const createFormRef = useRef<FormFn>(null)
   const [isLoading, setLoading] = useState(false)
   const [isCreateLoading, setCreateLoading] = useState(false)
   const [isCreateOpen, setCreateOpen] = useState(false)

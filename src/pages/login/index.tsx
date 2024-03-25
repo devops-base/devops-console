@@ -1,6 +1,6 @@
-import type { ILoginData } from './model'
+import type { ILoginData} from './model'
 import type { FormProps } from 'antd'
-import type { AppDispatch, RootState } from '@/stores'
+import type { AppDispatch } from '@/stores'
 import type { IThemeType } from '@/stores/public'
 import { message } from 'antd'
 import { setThemeValue } from '@/stores/public'
@@ -8,16 +8,16 @@ import { Form, Button, Input } from 'antd'
 import { useEffect, useState } from 'react'
 import {  THEME_KEY } from '@/utils/config'
 import { UserOutlined, LockOutlined, SecurityScanOutlined } from '@ant-design/icons'
-import {login, getCaptcha, getUserInfo, getPermission} from '@/servers/login'
+import {login, getCaptcha, getUserInfo, getUserMenus} from '@/servers/login'
 import { useTitle } from '@/hooks/useTitle'
 import { useToken } from '@/hooks/useToken'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { setPermissions, setUserInfo } from '@/stores/user'
 import { getFirstMenu } from '@/menus/utils/helper'
-import { defaultMenus } from '@/menus'
 import  style from "./login.module.less"
-import {permissionsToArray} from "@/utils/permissions"
+import { useCommonStore } from '@/hooks/useCommonStore';
+import {SideMenu} from "#/public"
 
 function Login() {
   useTitle('登录')
@@ -25,15 +25,16 @@ function Login() {
   const dispatch: AppDispatch = useDispatch()
   const [getToken, setToken] = useToken()
   const [isLoading, setLoading] = useState(false)
-  const menus = useSelector((state: RootState) => state.user.menus)
   const themeCache = (localStorage.getItem(THEME_KEY) || 'light') as IThemeType
   const [geCapCode, setCapCode] = useState("")
   const [getCapId, setCapId] = useState("")
+  let { menuList, permissions } = useCommonStore();
+  const [messageApi, contextHolder] = message.useMessage();
 
   // 获取验证码
   useEffect(() => {
     // 请求验证码数据
-    handleCaptcha().then(r =>{})
+    handleCaptcha().then()
   }, [])
 
   useEffect(() => {
@@ -50,8 +51,11 @@ function Login() {
   useEffect(() => {
     // 如果存在token，则直接进入页面
     if (getToken()) {
-      const firstMenu = getFirstMenu(defaultMenus, menus)
-      navigate(firstMenu)
+      if (!permissions.length) {
+        // 权限为空,获取权限
+        getUserPermission().then()
+      }
+      handleGoMenu(permissions).then()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -61,7 +65,7 @@ function Login() {
   * 处理验证码请求逻辑
    */
   const handleCaptcha = async () => {
-    const { data: {success, data, id} } = await getCaptcha()
+    const  {data, success,id} = await getCaptcha()
     if (success) {
       setCapCode(data);
       setCapId(id);
@@ -76,25 +80,54 @@ function Login() {
     try {
       setLoading(true)
       values.uuid = getCapId
-      const { data: { token, success }  } = await login(values)
+      const {token, success} = await login(values)
       if (success) {
         // 获取权限信息.
         setToken(token)
         const result  = await getUserInfo()
-        if (result.data.data) {
-          dispatch(setUserInfo(result.data.data))
+        if (result.data) {
+          dispatch(setUserInfo(result.data))
+          dispatch(setPermissions(result.data.permissions))
         }
-        const { data: {data} } = await getPermission()
-        if (!data?.length || !token) {
-          return message.error({ content: '用户暂无权限登录', key: 'permissions' })
-        }
-        const newPermission = permissionsToArray(data)
-        dispatch(setPermissions(newPermission))
-        navigate("/dashboard")
+        handleGoMenu(result.data.permissions)
       }
     } finally {
       setLoading(false)
     }
+  }
+
+  /**
+   * 获取用户权限
+   */
+  const getUserPermission = async() => {
+    try {
+      setLoading(true);
+        const result  = await getUserInfo()
+        if (result.data) {
+          dispatch(setUserInfo(result.data))
+          dispatch(setPermissions(result.data.permissions))
+        }
+        handleGoMenu(result.data.permissions)
+    } finally {
+       setLoading(false)
+    }
+  }
+
+  /**
+   * 跳转地址
+   */
+  const handleGoMenu = async(permissions: string[]) => {
+      let menuData: SideMenu[] = menuList;
+      if (!menuData.length) {
+        const {data} = await getUserMenus()
+        menuData = data;
+      }
+      // 获取有权限的菜单
+      const firstMenu = getFirstMenu(menuData, permissions)
+      if (!firstMenu) {
+        return messageApi.error({ content: '用户暂无权限登录', key: 'permissions' })
+      }
+      navigate(firstMenu)
   }
 
   /**
@@ -107,6 +140,7 @@ function Login() {
 
   return (
     <>
+      {contextHolder}
       <div className={`
         ${themeCache === 'dark' ? 'bg-black text-white' : 'bg-light-400'}
         w-screen
@@ -135,8 +169,8 @@ function Login() {
             onFinish={handleFinish}
             onFinishFailed={handleFinishFailed}
             initialValues={{
-              username: 'system',
-              password: '123456',
+              username: 'admin',
+              password: 'admin',
               code: '',
               uuid: getCapId,
             }}

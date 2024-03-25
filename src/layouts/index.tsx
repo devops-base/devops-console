@@ -1,12 +1,11 @@
-import type { AppDispatch, RootState } from '@/stores'
+import type { AppDispatch } from '@/stores'
 import { useToken } from '@/hooks/useToken'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useOutlet } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import {getPermission, getUserInfo} from '@/servers/login'
-import { permissionsToArray } from '@/utils/permissions'
+import { useDispatch } from 'react-redux'
+import {getUserInfo, getUserMenus} from '@/servers/login'
 import { setPermissions, setUserInfo } from '@/stores/user'
-import { toggleCollapsed, togglePhone } from '@/stores/menu'
+import {setMenuList, toggleCollapsed, togglePhone} from '@/stores/menu'
 import { useLocation } from 'react-router-dom'
 import { useDebounceFn } from 'ahooks'
 import { Icon } from '@iconify/react'
@@ -17,6 +16,7 @@ import Tabs from './components/Tabs'
 import Forbidden from '@/pages/403'
 import KeepAlive from 'react-activation'
 import styles from './index.module.less'
+import {useCommonStore} from "@/hooks/useCommonStore"
 
 function Layout() {
   const dispatch: AppDispatch = useDispatch()
@@ -28,33 +28,24 @@ function Layout() {
   const outlet = useOutlet()
   const [isLoading, setLoading] = useState(true)
 
-  // 权限
-  const permissions = useSelector((state: RootState) => state.user.menus)
-  // 用户ID
-  const userId = useSelector((state: RootState) => state.user.userInfo.userId)
-  // 是否窗口最大化
-  const isMaximize = useSelector((state: RootState) => state.tabs.isMaximize)
-  // 菜单是否收缩
-  const isCollapsed = useSelector((state: RootState) => state.menu.isCollapsed)
-  // 是否手机端
-  const isPhone = useSelector((state: RootState) => state.menu.isPhone)
-  // 是否重新加载
-  const isRefresh = useSelector((state: RootState) => state.public.isRefresh)
+  const {
+    permissions,
+    userId,
+    isMaximize,
+    isCollapsed,
+    isPhone,
+    isRefresh
+  } = useCommonStore();
 
   /** 获取用户信息和权限 */
   const getUserIfo = useCallback(async () => {
     try {
       setLoading(true)
       const result  = await getUserInfo()
-      if (result.data.data) {
-        dispatch(setUserInfo(result.data.data))
+      if (result.data) {
+        dispatch(setUserInfo(result.data))
       }
-      const { data: {data} } = await getPermission()
-      if (!data?.length || !token) {
-        return message.error({ content: '用户暂无权限登录', key: 'permissions' })
-      }
-      const newPermission = permissionsToArray(data)
-      dispatch(setPermissions(newPermission))
+      dispatch(setPermissions(result.data.permissions))
     } catch(err) {
       console.error('获取用户数据失败:', err)
       setPermissions([])
@@ -69,10 +60,11 @@ function Layout() {
     if (!token) {
       navigate('/login')
     }
+    console.log('111=>', userId)
     // 当用户信息缓存不存在时则重新获取
     if (token && !userId) {
-      getUserIfo().then(r => {
-      })
+      getUserIfo()
+      getMenuData()
     }
   }, [getUserIfo, navigate, token, userId])
 
@@ -83,6 +75,20 @@ function Layout() {
     if (isPhone) dispatch(toggleCollapsed(true))
     dispatch(togglePhone(isPhone))
   }, { wait: 500 })
+
+  /*获取菜单数据*/
+  const getMenuData = useCallback(async() => {
+    try {
+      setLoading(true)
+      const { data } = await getUserMenus()
+      if (!data?.length || !token) {
+        return message.error({ content: '用户暂无权限登录', key: 'permissions' })
+      }
+      dispatch(setMenuList(data))
+    } finally {
+       setLoading(false)
+    }
+  }, [])
 
   // 监听是否是手机端
   useEffect(() => {

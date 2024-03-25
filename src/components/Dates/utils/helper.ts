@@ -1,4 +1,4 @@
-import type { IFormData, IFormList } from '#/form'
+import type {FormList, IFormData,} from '#/form'
 import type { Dayjs } from 'dayjs'
 import type { RangeValue } from '#/public'
 import type { DatePickerProps } from 'antd'
@@ -12,6 +12,7 @@ import dayjs from 'dayjs'
 /**
  * dayjs类型转字符串类型
  * @param value - dayjs时间类型值
+ * @param format
  */
  export function dayjs2String(
   value: Dayjs | string,
@@ -100,7 +101,7 @@ export function stringRang2DayjsRang(
  * @param list - 列表值
  * @param key - 键值
  */
-function getListKeyParam(list: IFormList[], key: string): string {
+function getListKeyParam(list: FormList[], key: string): string {
   for (let i = 0; i < list.length; i++) {
     if (list[i].name === key) {
       return (list[i].componentProps as DatePickerProps)?.format as string
@@ -116,13 +117,13 @@ function getListKeyParam(list: IFormList[], key: string): string {
  * @param obj - 检测对象
  * @param list - 列表值
  */
-export function filterDayjs(obj: IFormData, list: IFormList[]): object {
+export function filterDayjs(obj: IFormData, list: FormList[]): object {
   for (const key in obj) {
     // 判断是否是时间区间
     if (
       (obj[key] as [Dayjs, Dayjs])?.length === 2 &&
       dayjs.isDayjs((obj[key] as [Dayjs, Dayjs])[0]) &&
-      dayjs.isDayjs((obj[key] as [Dayjs, Dayjs])[1]) 
+      dayjs.isDayjs((obj[key] as [Dayjs, Dayjs])[1])
     ) {
       const format = getListKeyParam(list, key)
       obj[key] = dayjsRang2StringRang(

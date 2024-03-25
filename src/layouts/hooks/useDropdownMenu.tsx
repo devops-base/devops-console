@@ -1,7 +1,7 @@
 import type { MenuProps } from 'antd'
-import type { AppDispatch, RootState } from '@/stores'
+import type { AppDispatch,  } from '@/stores'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch,  } from 'react-redux'
 import {
   closeLeft,
   closeOther,
@@ -15,8 +15,8 @@ import {
   VerticalAlignTopOutlined,
   VerticalAlignMiddleOutlined
 } from '@ant-design/icons'
-import { defaultMenus } from '@/menus'
 import { getMenuByKey } from '@/menus/utils/helper'
+import {useCommonStore} from "@/hooks/useCommonStore"
 
 enum ITabEnums {
   REFRESH = 'refresh', // 重新加载
@@ -37,8 +37,7 @@ export function useDropdownMenu(props: IProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const dispatch: AppDispatch = useDispatch()
-  const tabs = useSelector((state: RootState) => state.tabs.tabs)
-  const permissions = useSelector((state: RootState) => state.user.permissions)
+  const { tabs, permissions, menuList } = useCommonStore();
 
   // 菜单项
   const items: (key?: string) => MenuProps['items'] = (key = activeKey) => {
@@ -103,7 +102,7 @@ export function useDropdownMenu(props: IProps) {
         dispatch(closeLeft(key))
         if (pathname !== key) {
           const menuByKeyProps = {
-            menus: defaultMenus,
+            menus: menuList,
             permissions,
             key
           }
@@ -120,7 +119,7 @@ export function useDropdownMenu(props: IProps) {
         dispatch(closeRight(key))
         if (pathname !== key) {
           const menuByKeyProps = {
-            menus: defaultMenus,
+            menus: menuList,
             permissions,
             key
           }

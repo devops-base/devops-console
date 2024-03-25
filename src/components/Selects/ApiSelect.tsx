@@ -1,13 +1,13 @@
-import type { IApi } from '#/form'
+import type { ApiFn } from '#/form'
 import type { SelectProps } from 'antd'
 import type { DefaultOptionType } from 'antd/es/select'
 import { Select } from 'antd'
-import { useState } from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import { MAX_TAG_COUNT, PLEASE_SELECT } from '@/utils/config'
 import Loading from './components/Loading'
 
 interface IProps extends SelectProps {
-  api: IApi;
+  api: ApiFn;
   params?: object;
 }
 
@@ -24,22 +24,30 @@ function ApiSelect(props: IProps) {
   delete params.params
 
   /** 获取接口数据 */
-  const getApiData = async () => {
+  const getApiData = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await props.api?.(props?.params)
-      setOptions(data || [])
+      if (props.api) {
+        const {code, data} = await props.api?.(props?.params);
+        Number(code) === 200 && setOptions((data || []) as DefaultOptionType[]);
+      }
     } finally {
       setLoading(false)
     }
-  }
+  },[])
+
+  useEffect(() => {
+    if (props.value && options.length === 0) {
+      getApiData().then()
+    }
+  }, [props.value]);
 
   /**
    * 展开下拉回调
    * @param open - 是否展开
    */
   const onDropdownVisibleChange = (open: boolean) => {
-    if (open) getApiData()
+    if (open) getApiData().then()
 
     props.onDropdownVisibleChange?.(open)
   }

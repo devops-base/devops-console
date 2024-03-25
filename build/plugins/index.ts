@@ -1,13 +1,11 @@
 import type { PluginOption } from 'vite'
 import { presetUno, presetAttributify, presetIcons } from 'unocss'
-import { configPageImportPlugin } from './pages'
 import { visualizer } from 'rollup-plugin-visualizer'
-import { preloadPlugin } from './preload'
 import { timePlugin } from './time'
-import { cachePlugin } from './cache'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 import Unocss from 'unocss/vite'
 import viteCompression from 'vite-plugin-compression'
+import {versionUpdatePlugin} from "./version"
 
 export function createVitePlugins() {
   // 插件参数
@@ -20,22 +18,18 @@ export function createVitePlugins() {
         presetIcons()
       ],
     }),
+    // 版本控制
+    versionUpdatePlugin(),
+  ];
+
+  if (process.env["VITE_ENV"]==='production') {
     // 包分析
     visualizer({
       gzipSize: true,
       brotliSize: true,
-    }),
-    // 缓存策略
-    cachePlugin(),
-    // 打包时间
-    timePlugin(),
-    // 压缩包
-    viteCompression(),
-    // 自动生成路由
-    configPageImportPlugin(),
-    // 预加载处理
-    process.env.NODE_ENV === 'production' && preloadPlugin()
-  ]
-
+    })
+    timePlugin()
+    vitePlugins.push(viteCompression())
+  }
   return vitePlugins
 }

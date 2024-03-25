@@ -1,11 +1,9 @@
 import type { MenuProps } from 'antd'
-import type { ISideMenu } from '#/public'
+import type { SideMenu } from '#/public'
 import type { AppDispatch } from '@/stores'
 import {useCallback, useEffect, useState} from 'react'
 import { Menu } from 'antd'
-import { RootState } from '@/stores'
-import { useDispatch, useSelector } from 'react-redux'
-import { defaultMenus } from '@/menus'
+import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { addTabs, setNav, setActiveKey } from '@/stores/tabs'
 import { setOpenKeys, setSelectedKeys, toggleCollapsed } from '@/stores/menu'
@@ -19,22 +17,22 @@ import {
 import styles from '../index.module.less'
 import Logo from '@/assets/images/logo.svg'
 import { Icon} from '@iconify/react'
+import {useCommonStore} from "@/hooks/useCommonStore"
 
 function LayoutMenu() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const dispatch: AppDispatch = useDispatch()
-  const [menus, setMenus] = useState<ISideMenu[]>([])
-  const selectedKeys = useSelector((state: RootState) => state.menu.selectedKeys)
-  const openKeys = useSelector((state: RootState) => state.menu.openKeys)
-  // 是否窗口最大化
-  const isMaximize = useSelector((state: RootState) => state.tabs.isMaximize)
-  // 菜单是否收缩
-  const isCollapsed = useSelector((state: RootState) => state.menu.isCollapsed)
-  // 是否手机端
-  const isPhone = useSelector((state: RootState) => state.menu.isPhone)
-  // 权限
-  const permissions = useSelector((state: RootState) => state.user.menus)
+  const [menus, setMenus] = useState<SideMenu[]>([])
+  const {
+    isMaximize,
+    isCollapsed,
+    isPhone,
+    openKeys,
+    selectedKeys,
+    permissions,
+    menuList
+  } = useCommonStore();
 
   // 处理默认展开
   useEffect(() => {
@@ -50,7 +48,7 @@ function LayoutMenu() {
    * 转换菜单icon格式
    * @param menus - 菜单
    */
-  const filterMenuIcon = useCallback((menus: ISideMenu[]) => {
+  const filterMenuIcon = useCallback((menus: SideMenu[]) => {
     for (let i = 0; i < menus.length; i++) {
       if (menus[i]?.icon) {
         menus[i].icon = (
@@ -59,7 +57,7 @@ function LayoutMenu() {
       }
 
       if (menus[i]?.children?.length) {
-        filterMenuIcon(menus[i].children as ISideMenu[])
+        filterMenuIcon(menus[i].children as SideMenu[])
       }
     }
   }, [])
@@ -67,11 +65,11 @@ function LayoutMenu() {
   // 过滤没权限菜单
   useEffect(() => {
     if (permissions.length > 0) {
-      const newMenus = filterMenus(defaultMenus, permissions)
+      const newMenus = filterMenus(menuList, permissions)
       filterMenuIcon(newMenus)
       setMenus(newMenus || [])
     }
-  }, [filterMenuIcon,permissions])
+  }, [filterMenuIcon, permissions, menuList])
 
   /**
    * 处理跳转
@@ -151,7 +149,6 @@ function LayoutMenu() {
   const hiddenMenu = () => {
     dispatch(toggleCollapsed(true))
   }
-
   return (
     <>
       <div

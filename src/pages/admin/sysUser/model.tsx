@@ -1,4 +1,4 @@
-import type { IFormList } from '#/form'
+import type {FormList} from '#/form'
 import type { ITableColumn, ITableOptions } from '#/public'
 import { INPUT_REQUIRED, SELECT_REQUIRED } from '@/utils/config'
 import {IConstant, USER_STATUS} from '@/utils/constants'
@@ -7,7 +7,7 @@ import {IFormData} from "#/form"
 import {valueToLable} from "@/utils/helper"
 
 // 搜索数据
-export const searchList: IFormList[] = [
+export const searchList: FormList[] = [
   {
     label: '用户名',
     name: 'username',
@@ -107,7 +107,7 @@ export const searchList: IFormList[] = [
 }
 
 // 新增数据
-export const createList: (roleList: IFormData[],deptList: IConstant[] ) => IFormList[] = (RoleList,DeptList) => [
+export const createList: (roleList: IFormData[],deptList: IConstant[] ) => FormList[] = (RoleList,DeptList) => [
   {
     label: '用户名',
     name: 'username',

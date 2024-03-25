@@ -52,13 +52,13 @@ export interface IPaginationData {
 }
 
 // 侧边菜单
-export interface ISideMenu extends Omit<SubMenuType, 'children' | 'label' | 'icon'> {
+export interface SideMenu extends Omit<SubMenuType, 'children' | 'label' | 'icon'> {
   label: string;
   key: string;
   icon?: React.ReactNode | string;
   rule?: string; // 路由权限
   nav?: string[]; // 面包屑路径
-  children?: ISideMenu[];
+  children?: SideMenu[];
 }
 
 // 页面权限

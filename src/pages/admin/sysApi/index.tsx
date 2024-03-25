@@ -1,6 +1,6 @@
 import {useTitle} from "@/hooks/useTitle"
 import {useCallback, useEffect, useRef, useState} from "react"
-import BasicForm, {IFormFn} from "@/components/Form/BasicForm"
+import BasicForm, {FormFn} from "@/components/Form/BasicForm"
 import {ADD_TITLE, EDIT_TITLE} from "@/utils/config"
 import {IFormData} from "#/form"
 import {useSelector} from "react-redux"
@@ -38,8 +38,8 @@ interface IRowData {
 
 function Page() {
   useTitle('接口管理')
-  const searchFormRef = useRef<IFormFn>(null)
-  const createFormRef = useRef<IFormFn>(null)
+  const searchFormRef = useRef<FormFn>(null)
+  const createFormRef = useRef<FormFn>(null)
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [isLoading, setLoading] = useState(false)
   const [isCreateLoading, setCreateLoading] = useState(false)

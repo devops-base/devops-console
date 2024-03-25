@@ -1,4 +1,4 @@
-import type { IComponentType, IFormList } from '#/form'
+import { FormList, ComponentType} from '#/form'
 import { initCompProps } from './helper'
 import {
   Input,
@@ -53,14 +53,11 @@ componentMap.set('Transfer', BasicTransfer)
 componentMap.set('Tree', BasicTree)
 componentMap.set('Textarea', TextArea)
 
-// 业务组件注入
-// CreateBusiness()
-
 /**
  * 获取组件
  * @param item - 表单项
  */
-export function getComponent(item: IFormList) {
+export function getComponent(item: FormList) {
   const { component, componentProps } = item
 
   // 当组件类型为自定义时
@@ -76,10 +73,18 @@ export function getComponent(item: IFormList) {
   if (!Comp) return <></>
 
   return (
-    <Comp
-      {...initCompProps(component)}
-      {...componentProps}
-    />
+    <>
+      <Comp
+        {...initCompProps(component)}
+        {...componentProps}
+      />
+      {
+        item.unit &&
+        <span className='ml-5px whitespace-nowrap'>
+          { item.unit }
+        </span>
+      }
+    </>
   )
 }
 
@@ -88,7 +93,7 @@ export function getComponent(item: IFormList) {
  * @param name - 组件名
  * @param component - 组件
  */
-export function addComponent(name: IComponentType, component: unknown): void {
+export function addComponent(name: ComponentType, component: unknown): void {
   componentMap.set(name, component)
 }
 
@@ -96,6 +101,6 @@ export function addComponent(name: IComponentType, component: unknown): void {
  * 删除组件
  * @param name - 组件名
  */
-export function deleteComponent(name: IComponentType): void {
+export function deleteComponent(name: ComponentType): void {
   componentMap.delete(name)
 }

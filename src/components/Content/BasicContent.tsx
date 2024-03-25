@@ -1,8 +1,9 @@
 import Forbidden from '@/pages/403'
+import React from "react"
 
 interface IProps {
   isPermission?: boolean;
-  children: JSX.Element;
+  children: React.JSX.Element;
 }
 
 function BasicContent(props: IProps) {

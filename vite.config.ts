@@ -37,20 +37,11 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    test: {
-      environment: 'jsdom',
-      globals: true,
-      setupFiles: './tests/index.tsx'
-    },
     server: {
       open: true,
       port: VITE_SERVER_PORT,
       // 跨域处理
       proxy: createProxy(VITE_PROXY)
-    },
-    // 去除console和debugger
-    esbuild: {
-      pure: ["console.log", "debugger"]
     },
     build: buildOptions()
   }

@@ -12,7 +12,10 @@ export const useTimes = () => {
       setTime(dayjs().format("YYYY年MM月DD日 HH:mm:ss"))
     }, 1000)
     return () => {
-      if (timer) clearInterval(timer.current as NodeJS.Timer)
+      if (timer) {
+        // @ts-ignore
+        clearInterval(timer.current as NodeJS.Timer)
+      }
     }
   }, [time])
 

@@ -12,6 +12,7 @@ import type {
   SliderSingleProps,
   TimeRangePickerProps,
   TransferProps,
+  FormItemProps
 } from "antd"
 import type {Key, ReactElement, ReactNode} from "react"
 import type { IAllDataType } from './public'
@@ -22,6 +23,7 @@ import type { IBusinessComponents } from '@/components/Business'
 import type { IEditorProps } from '@/components/WangEditor'
 import {TextAreaProps} from "antd/es/input"
 import {ITreeProps} from "@/components/Tree/BasicTree"
+import {ServerResult} from "@/servers/request/types"
 
 // 数据类型
 export type IFormData = Record<string, IAllDataType>
@@ -71,7 +73,7 @@ type IEditorComponents = 'Editor'
 type IPasswordStrength = 'PasswordStrength'
 
 // 组件集合
-export type IComponentType = IDefaultDataComponents |
+export type ComponentType = IDefaultDataComponents |
                           ISelectComponents |
                           ICheckboxComponents |
                           ITimeComponents |
@@ -95,19 +97,13 @@ export interface IApiResult extends Omit<DefaultOptionType, 'value'> {
   value?: string | number;
 }
 
-export type IApi = (params?: object) => Promise<IApiResult[]>
+export type ApiFn = (params?: object) => Promise<ServerResult<unknown>>
 
 // api参数
-interface IApiParam {
-  api?: IApi;
+interface ApiParam {
+  api?: ApiFn;
   params?: object;
 }
-
-// ApiSelect
-export type IApiSelectProps = IApiParam & SelectProps
-
-// ApiTreeSelect
-export type IApiTreeSelectProps = IApiParam & TreeSelectProps
 
 // 组件参数
 export type IComponentProps = InputProps |
@@ -131,7 +127,7 @@ export type IComponentProps = InputProps |
                               IEditorProps
 
 // 表单规则
-export type IFormRule = RuleObject & {
+export type FormRule = RuleObject & {
   trigger?: 'blur' | 'change' | ['change', 'blur'];
 }
 
@@ -141,7 +137,7 @@ export type IFormList = {
   label: string; // 标签
   placeholder?: string; // 占位符
   hidden?: boolean; // 是否隐藏
-  rules?: IFormRule[]; // 规则
+  rules?: FormRule[]; // 规则
   labelCol?: number; // label宽度
   wrapperCol?: number; // 内容宽度
   component: IComponentType; // 组件
@@ -150,3 +146,41 @@ export type IFormList = {
 }
 
 export type SelectObjectStr = Record<string, string>
+
+export type FormData = Record<string, unknown>
+
+// 组件参数
+export type ComponentProps =  InputProps |
+                              InputNumberProps |
+                              SelectProps |
+                              TreeSelectProps |
+                              CheckboxProps |
+                              RadioProps |
+                              DatePickerProps |
+                              TimePickerProps |
+                              UploadProps |
+                              RateProps |
+                              TextAreaProps |
+                              TimeRangePickerProps |
+                              TransferProps |
+                              RangePickerProps |
+                              SliderSingleProps |
+                              IApiSelectProps |
+                              IApiTreeSelectProps |
+                              ITreeProps |
+                              IEditorProps
+
+// 表单数据
+export interface FormList extends FormItemProps {
+  name: string | string[]; // 表单域字段
+  label: string; // 标签
+  placeholder?: string; // 占位符
+  hidden?: boolean; // 是否隐藏
+  unit?: string; // 单位
+  rules?: IFormRule[]; // 规则
+  labelCol?: number; // label宽度
+  wrapperCol?: number; // 内容宽度
+  component: ComponentType; // 组件
+  componentProps?: ComponentProps; // 组件参数
+  render?: ReactElement; // 自定义渲染
+}
