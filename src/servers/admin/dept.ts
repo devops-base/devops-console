@@ -1,61 +1,47 @@
-
-import { request } from '@/utils/request'
-import {IFormData} from "#/form"
-import {IPaginationData, IServerResult} from "#/public"
+import {request} from "@/servers/request";
+import {ServerResult} from "@/servers/request/types";
+import {FormData} from "#/form";
+import {TableData} from "#/public";
 
 enum API {
   URL = '/v1/sysDept'
 }
 
-/**
- * 获取所有部门数据
- */
+// 获取所有部门数据
 export function getAllDept() {
-  return request.get<IServerResult<IFormData[]>>(
+  return request.get<ServerResult<FormData[]>>(
     `${API.URL}/list`,
-  )
+  );
 }
 
-/**
- * 获取分页数据
- * @param data - 请求数据
- */
-export function getDeptPage(data: Partial<IFormData> & IPaginationData) {
-  return request.get<IServerResult<IFormData[]>>(
-    `${API.URL}`,
-    { params: data }
-  )
+// 获取部门树数据
+export function getDeptTreeData() {
+  return request.get<ServerResult<FormData>>(
+    `${API.URL}/deptTree`
+  );
 }
 
-/**
- * 根据ID获取数据
- * @param id - ID
- */
-export function getDeptById(id: string) {
-  return request.get(`${API.URL}/${id}`)
+// 分页获取部门信息
+export function getDeptPage(data?: unknown) {
+  return request.get<ServerResult<TableData[]>>(`${API.URL}`, {params: data});
 }
 
-/**
- * 新增数据
- * @param data - 请求数据
- */
-export function createDept(data: IFormData) {
-  return request.post(`${API.URL}`, data)
+// 根据Id获取数据
+export function getDeptId(id: string) {
+  return request.get<ServerResult<FormData>>(`${API.URL}/${id}`);
 }
 
-/**
- * 修改数据
- * @param id - 修改id值
- * @param data - 请求数据
- */
-export function updateDept(id: string, data: IFormData) {
-  return request.put(`${API.URL}/${id}`, data)
+// 新增数据
+export function createDept(data: FormData) {
+  return request.post<ServerResult>(`${API.URL}`, data);
 }
 
-/**
- * 删除
- * @param id - 删除id值
- */
-export function deleteDept(id: string) {
-  return request.delete(`${API.URL}/${id}`)
+// 更新部门
+export function updateDept(id: string, data: unknown) {
+  return request.put<ServerResult>(`${API.URL}/${id}`, data);
+}
+
+// 删除部门
+export function deleteDept(id: number) {
+  return request.delete<ServerResult>(`${API.URL}/${id}`);
 }

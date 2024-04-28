@@ -1,40 +1,41 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { defineStore } from 'pinia';
 
-export type IThemeType = 'dark' | 'light'
+export type ThemeType = 'light' | 'dark';
 
-export const publicSlice = createSlice({
-  name: 'public',
-  initialState: {
-    theme: 'light' as IThemeType, // 主题
-    isFullscreen: false, // 是否全屏
-    isRefresh: false, // 重新加载
-    isRefreshPage: false // 重新加载页面
+interface StateData {
+  isRefreshPage: boolean;
+  themeType: ThemeType;
+  version: string;
+}
+
+export const usePublicStore = defineStore({
+  id: 'public',
+  state: () => ({
+    isRefreshPage: false,
+    themeType: 'light',
+    version: ''
+  } as StateData),
+  actions: {
+    /**
+     * 设置刷新页面
+     * @param isRefresh - 是否刷新
+     */
+    setRefreshPage(isRefresh: boolean) {
+      this.isRefreshPage = isRefresh;
+    },
+    /**
+     * 设置主题
+     * @param themeType - 路由数据
+     */
+    setTheme(themeType: ThemeType) {
+      this.themeType = themeType;
+    },
+    /**
+     * 设置版本号
+     * @param version - 路由数据
+     */
+    setVersion(version: string) {
+      this.version = version;
+    },
   },
-  reducers: {
-    /** 设置主题 */
-    setThemeValue: (state, action) => {
-      state.theme = action.payload
-    },
-    /** 设置全屏 */
-    setFullscreen: (state, action) => {
-      state.isFullscreen = action.payload
-    },
-    /** 设置重新加载 */
-    setRefresh: (state, action) => {
-      state.isRefresh = action.payload
-    },
-    /** 设置重新加载页面 */
-    setRefreshPage: (state, action) => {
-      state.isRefreshPage = action.payload
-    }
-  }
-})
-
-export const {
-  setThemeValue,
-  setFullscreen,
-  setRefresh,
-  setRefreshPage
-} = publicSlice.actions
-
-export default publicSlice.reducer
+});

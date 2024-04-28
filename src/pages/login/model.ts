@@ -1,7 +1,5 @@
 // 接口传入数据
-import {SideMenu} from "#/public"
-
-export interface ILoginData {
+export interface LoginData {
   username: string;
   password: string;
   code: string;
@@ -9,11 +7,48 @@ export interface ILoginData {
 }
 
 // 授权数据
-export interface IPermissions {
+export interface PermissionsData {
+  id: string;
+  operation: string[];
+}
+
+// 接口返回数据
+export interface LoginResult {
+  token: string;
+  code: number;
+  currentAuthority: string;
+  expire: string;
+  success: boolean;
+}
+
+// 用户信息接口返回数据
+export interface UserInfoResult {
+  avatar: string;
+  buttons: string[];
+  deptId: number;
+  introduction: string;
+  name: string;
+  permissions: string[];
+  role: string[];
+  userId: number;
+  userName: string;
+}
+
+// 验证码接口返回数据
+export interface CaptchaResult {
+  code: number
+  data: string;
+  id: string;
+  msg: string;
+  success: boolean;
+}
+
+// 授权数据
+export interface Permissions {
   RoleId: number;
   action: string;
   apis: number[];
-  children: IPermissions[];
+  children: Permissions[];
   breadcrumb: string;
   component: string;
   createBy: number;
@@ -36,42 +71,4 @@ export interface IPermissions {
   updateBy: number;
   updatedAt: string;
   visible: string;
-}
-
-// 接口返回数据
-export interface LoginResult {
-  token: string;
-  code: number;
-  currentAuthority: string;
-  expire: string;
-  success: boolean;
-}
-
-// 验证码接口返回数据
-export  interface CaptchaResult {
-  code: number
-  data: string;
-  id: string;
-  msg: string;
-  success: boolean;
-}
-
-// 用户信息接口返回数据
-export interface UserInfoResult {
-  avatar: string;
-  buttons: string[];
-  deptId: number;
-  introduction: string;
-  name: string;
-  permissions: string[];
-  role: string[];
-  userId: number;
-  userName: string;
-}
-
-// 用户权限接口返回数据
-export interface UserPermission {
-  code: number;
-  data: SideMenu[];
-  requestId: string;
 }

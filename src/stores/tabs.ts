@@ -1,157 +1,269 @@
-import type { TabPaneProps } from 'antd'
-import { createSlice } from '@reduxjs/toolkit'
-import {NavData} from "@/menus/utils/helper"
-import React from "react"
+import type { TabPaneProps } from 'ant-design-vue';
+import { defineStore } from 'pinia';
+import { useMenuStore } from './menu';
+import { getFirstTab } from '@/utils/menu';
+import { router } from '@/router';
+import { routeToKeepalive } from '@/router/utils/helper';
 
-interface TabsData extends Omit<TabPaneProps, 'tab'> {
+export interface TabsData extends Omit<TabPaneProps, 'tab'> {
   key: string;
-  label: React.ReactNode;
-  labelZh: React.ReactNode;
-  labelEn: React.ReactNode;
+  url: string;
+  label: string;
 }
 
-const tabsSlice = createSlice({
-  name: 'tabs',
-  initialState: {
-    isLock: false,
-    isMaximize: false,
+interface TabsState {
+  // 缓存一次关闭标签键值
+  cacheCloseTabKey: string;
+  // 当前选中的标签
+  activeKey: string;
+  // 上一个路径
+  prevPath: string;
+  // 标签栏数据
+  tabs: TabsData[];
+  // 导航数据
+  nav: string[];
+  // 缓存的标签
+  cacheTabs: Record<string, TabsData[]>;
+  // 缓存的路由名称
+  cacheRoutes: string[];
+}
+
+export const useTabStore = defineStore({
+  id: 'tabs',
+  state: () => ({
     activeKey: '',
-    nav: [] as NavData[],
-    tabs: [] as TabsData[]
-  },
-  reducers: {
-    /** 设置锁 */
-    toggleLock: (state, action) => {
-      state.isLock = !!action.payload
+    prevPath: '',
+    cacheCloseTabKey: '',
+    tabs: [],
+    nav: [],
+    cacheTabs: {},
+    cacheRoutes: []
+  } as TabsState),
+  actions: {
+    /** 
+     * 添加缓存路由
+     * @param key - 路由值
+     */
+    addCacheRoutes(key: string) {
+      const value = routeToKeepalive(key);
+      if (!this.cacheRoutes.includes(value)) {
+        this.cacheRoutes.push(value);
+      }
     },
-    /** 切换最大化 */
-    toggleMaximize: (state, action) => {
-      state.isMaximize = !!action.payload
+    /** 
+     * 删除缓存路由
+     * @param key - 路由值
+     */
+    removeCacheRoutes(key: string) {
+      const value = routeToKeepalive(key);
+      const index = this.cacheRoutes.findIndex(item => item === value);
+      if (index >= 0) this.cacheRoutes.splice(index, 1);
     },
-    /** 设置选择 */
-    setActiveKey: (state, action) => {
-      state.activeKey = action.payload
+    /** 清空缓存路由 */
+    clearCacheRoutes() {
+      this.cacheRoutes = [];
     },
-    /** 设置导航 */
-    setNav: (state, action) => {
-      state.nav = action.payload
+    /**
+     * 添加上一个路径地址
+     * @param path - 路径
+     */
+    addPrevPath(path: string) {
+      this.prevPath = path;
     },
-    /** 添加标签  */
-    addTabs: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-
+    /**
+     * 设置导航
+     * @param nav - 导航数据
+     */
+    setNav(nav: string[]) {
+      this.nav = nav;
+    },
+    /**
+     * 设置选中的标签
+     * @param targetKey - 当前选中唯一值
+     */
+    setActiveKey(targetKey: string) {
+      this.activeKey = targetKey;
+    },
+    /**
+     * 设置标签栏
+     * @param tabs - 标签栏数据
+     */
+    setTabs(tabs: TabsData[]) {
+      this.tabs = tabs;
+    },
+    /**
+     * 添加标签页
+     * @param tab - 标签数据
+     */
+    addTabs(tab: TabsData) {
+      const key = getFirstTab(tab.key);
       // 判断是否存在相同的路由，不存在则累加
-      const has = tabs.find(item => item.key === payload.key)
-      if (!has) tabs.push(payload)
+      const hasIndex = this.tabs.findIndex(item => item.key === tab.key);
+      if (hasIndex === -1) {
+        this.tabs.push(tab);
 
-      // 如果只剩一个则无法关闭
-      if (tabs?.length) tabs[0].closable = tabs?.length > 1
-    },
-    /** 关闭标签 */
-    closeTabs: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-
-      // 发现下标并从数组中删除
-      const index = tabs.findIndex(item => item.key === payload)
-      if (index >= 0) tabs.splice(index, 1)
-
-      // 如果当前下标是当前选中的标签，则跳转至上一个/下一个有效值
-      if (payload === state.activeKey) {
-        let target = ''
-        if (index === 0) {
-          target = tabs?.[index]?.key || ''
-        } else {
-          target = tabs[index - 1].key
+        // 如果存在缓存的删除标签
+        if (this.cacheCloseTabKey) {
+          this.closeTabs(this.cacheCloseTabKey);
+          this.cacheCloseTabKey = '';
         }
-        state.activeKey = target
-        state.isLock = true
+      } else if (tab.url !== this.tabs[hasIndex].url || tab.label !== this.tabs[hasIndex].label) {
+        this.closeTabs(tab.key);
+
+        let timer: NodeJS.Timeout | null = setTimeout(() => {
+          clearTimeout(timer as NodeJS.Timeout);
+          timer = null;
+          this.addTabs(tab);
+          router.push(tab.url);
+        }, 100);
       }
+      this.cacheTabs[`/${key}`] = this.tabs;
 
       // 如果只剩一个则无法关闭
-      if (tabs?.length) tabs[0].closable = tabs?.length > 1
+      if (this.tabs?.length) this.tabs[0].closable = this.tabs?.length > 1;
     },
-    /** 关闭标签并跳转新的页面 */
-    closeTabGoNext: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-      const { key, nextPath } = payload
+    /**
+     * 移除当前标签页
+     * @param targetKey - 标签唯一值
+     */
+    closeTabs(targetKey: string) {
+      // 当数组为空，首次进入需要关闭且异步未获取标签数据时，记录事件
+      if (!this.tabs?.length) {
+        this.cacheCloseTabKey = targetKey;
+        return;
+      }
 
       // 发现下标并从数组中删除
-      const index = tabs.findIndex(item => item.key === key)
-      if (index >= 0) tabs.splice(index, 1)
+      const index = this.tabs.findIndex(item => item.key === targetKey);
+      if (index >= 0) this.tabs.splice(index, 1);
+      this.removeCacheRoutes(targetKey); // 清除当前页面keepalive缓存
 
       // 如果当前下标是当前选中的标签，则跳转至上一个/下一个有效值
-      if (key === state.activeKey) {
-        state.activeKey = nextPath
-        state.isLock = true
+      if (targetKey === this.activeKey) {
+        let target = '', nextUrl = '';
+        if (index === 0) {
+          target = this.tabs[index]?.key;
+          nextUrl = this.tabs[index]?.url;
+        } else {
+          target = this.tabs[index - 1]?.key;
+          nextUrl = this.tabs[index - 1]?.url;
+        }
+        this.activeKey = target;
+        nextUrl && router.push(nextUrl);
       }
 
-      // 如果只剩一个则无法关闭
-      if (tabs?.length) tabs[0].closable = tabs?.length > 1
-    },
-    /** 关闭左侧 */
-    closeLeft: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-
-      // 发现下标并从数组中删除
-      const index = tabs.findIndex(item => item.key === payload)
-      if (index >= 0) tabs.splice(0, index)
-      state.activeKey = tabs[0].key
+      const { topMenuKey } = useMenuStore();
+      this.cacheTabs[topMenuKey] = this.tabs;
 
       // 如果只剩一个则无法关闭
-      if (tabs?.length) tabs[0].closable = tabs?.length > 1
+      if (this.tabs?.length) this.tabs[0].closable = this.tabs?.length > 1;
     },
-    /** 关闭右侧 */
-    closeRight: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-
+    /**
+     * 关闭标签并跳转新的页面
+     * @param targetKey - 关闭的key
+     * @param nextPath - 跳转下一个路径
+     */
+    closeTabGoNext(targetKey: string, nextPath: string) {
       // 发现下标并从数组中删除
-      const index = tabs.findIndex(item => item.key === payload)
-      if (index >= 0) tabs.splice(index + 1, tabs.length - index - 1)
-      state.activeKey = tabs[tabs.length - 1].key
+      const index = this.tabs.findIndex(item => item.key === targetKey);
+      if (index >= 0) this.tabs.splice(index, 1);
+      this.removeCacheRoutes(targetKey); // 清除当前页面keepalive缓存
+
+      // 如果当前下标是当前选中的标签，则跳转至上一个/下一个有效值
+      if (targetKey === this.activeKey) {
+        router.push(nextPath);
+      }
+
+      const { topMenuKey } = useMenuStore();
+      this.cacheTabs[topMenuKey] = this.tabs;
 
       // 如果只剩一个则无法关闭
-      if (tabs?.length) tabs[0].closable = tabs?.length > 1
+      if (this.tabs?.length) this.tabs[0].closable = this.tabs?.length > 1;
     },
-    /** 关闭其他 */
-    closeOther: (state, action) => {
-      const { tabs } = state
-      const { payload } = action
-
+    /**
+     * 移除其他标签页
+     * @param targetKey - 标签唯一值
+     */
+    closeOther(targetKey: string) {
       // 发现下标并从数组中删除
-      const tab = tabs.find(item => item.key === payload)
+      let tab: TabsData = {
+        label: '',
+        key: '',
+        url: '',
+      };
+
+      for (let i = 0; i < this.tabs?.length; i++) {
+        const item = this.tabs[i];
+        
+        if (item.key === targetKey) {
+          tab = item;
+        } else {
+          this.removeCacheRoutes(item.key); // 清除当前页面keepalive缓存
+        }
+      }
+
       if (tab) {
-        state.tabs = [tab]
-        state.activeKey = tab.key
-        state.isLock = true
+        this.tabs = [tab];
+        this.activeKey = tab.key;
       }
+      
+      const { topMenuKey } = useMenuStore();
+      this.cacheTabs[topMenuKey] = this.tabs;
 
       // 如果只剩一个则无法关闭
-      tabs[0].closable = false
+      if (this.tabs?.length) this.tabs[0].closable = false;
+    },
+    /**
+     * 关闭左侧
+     * @param targetKey - 标签唯一值
+     */
+    closeLeft(targetKey: string) {
+      // 发现下标并从数组中删除
+      const index = this.tabs.findIndex(item => item.key === targetKey);
+
+      // 清除左侧标签keepalive缓存
+      for (let i = 0; i < index; i++) {
+        const item = this.tabs[i];
+        this.removeCacheRoutes(item.key); // 清除当前页面keepalive缓存
+      }
+
+      if (index >= 0) this.tabs.splice(0, index);
+      this.activeKey = this.tabs[0].key;
+      
+      const { topMenuKey } = useMenuStore();
+      this.cacheTabs[topMenuKey] = this.tabs;
+
+      // 如果只剩一个则无法关闭
+      if (this.tabs?.length) this.tabs[0].closable = this.tabs?.length > 1;
+    },
+    /**
+     * 关闭右侧
+     * @param targetKey - 标签唯一值
+     */
+    closeRight(targetKey: string) {
+      // 发现下标并从数组中删除
+      const index = this.tabs.findIndex(item => item.key === targetKey);
+
+      // 清除右侧标签keepalive缓存
+      for (let i = index; i < this.tabs.length; i++) {
+        const item = this.tabs[i];
+        this.removeCacheRoutes(item.key); // 清除当前页面keepalive缓存
+      }
+
+      if (index >= 0) this.tabs.splice(index + 1, this.tabs.length - index - 1);
+      this.activeKey = this.tabs[this.tabs.length - 1].key;
+
+      const { topMenuKey } = useMenuStore();
+      this.cacheTabs[topMenuKey] = this.tabs;
+
+      // 如果只剩一个则无法关闭
+      if (this.tabs?.length) this.tabs[0].closable = this.tabs?.length > 1;
     },
     /** 关闭全部 */
-    closeAllTab: (state) => {
-      state.tabs = []
+    closeAllTab() {
+      this.tabs = [];
+      this.cacheRoutes = [];
+      this.cacheTabs = {};
     }
   }
-})
-
-export const {
-  toggleLock,
-  toggleMaximize,
-  setActiveKey,
-  setNav,
-  addTabs,
-  closeTabs,
-  closeTabGoNext,
-  closeLeft,
-  closeRight,
-  closeOther,
-  closeAllTab
-} = tabsSlice.actions
-
-export default tabsSlice.reducer
+});

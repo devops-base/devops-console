@@ -1,60 +1,45 @@
 ## ✨ 简介
 
-使用`React18`,`Typescript`,`Vite`,`Antd5.0`等主流技术开发的开箱即用的中后台前端项目，`Vite`实现自动生成路由，支持`KeepAlive`功能，`react-redux`状态管理，支持虚拟滚动表格，`UnoCss`开发样式。
-
-## 🚀 项目演示
-[演示地址](https://southliu.github.io/)
+使用`Vue3`,`Vite`,`TypeScript`,`Ant Design Vue`等主流技术开发的开箱即用的中后台前端项目，支持`keepalive`功能，`Vite`自动生成路由，`pinia`状态管理，`vxe-table`虚拟滚动表格，`UnoCss`开发样式。
 
 
-## 🐱‍💻 安装使用
+## 💻 安装使用
 
 - 获取项目代码
 
 ```bash
-git clone https://github.com/southliu/react-admin.git
+git clone https://github.com/devops-base/devops-console.git
 ```
 
 - 选择目录
 
 ```bash
-cd react-admin
+cd devops-console
 ```
 
 - 安装全局依赖依赖，存在则不用安装
 
 ```bash
-npm i -g yarn
+npm i -g pnpm
 ```
 
-- 安装依赖，如果使用pnpm安装可能会出现**安装失败**的问题
+- 安装依赖
+
 ```bash
-yarn install
+pnpm install
 ```
 
 - 运行
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 - 打包
 
 ```bash
-yarn build
+pnpm build
 ```
-
-## 💡 计划
-
-- [x] 主题换肤功能
-- [x] 密码强度显示
-- [x] KeepAlive功能
-- [x] 表格虚拟滚动优化
-- [x] form添加富文本、自定义渲染
-- [x] 新增跳转单独页逻辑
-- [x] 可视化数据大屏
-- [x] 打包分包
-- [x] 手机端适配
-- [ ] 测试用例
 
 ## 🧩 图标(iconify)
 
@@ -93,8 +78,82 @@ git push
   npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'
 ```
 
+## 💡 计划
+
+- [x] 主题换肤功能
+- [ ] i18n语言切换
+- [x] 表单嵌套结构
+- [x] 包分析工具
+- [x] cli生成增删改查
+- [x] 剪切板功能
+- [x] 富文本组件
+- [x] 虚拟滚动组件
+- [x] 水印组件
+- [x] 密码强度显示
+- [x] 内容最大化功能
+- [x] 404错误页
+- [x] 封装文档说明
+- [x] 密码规则
+- [x] 弹窗拖拽功能
+- [x] 弹窗最大化功能
+- [x] Icon封装
+- [x] 标签页右键功能
+- [x] 搜索菜单功能
+
+## 🐓 keep-alive说明：
+### 如果需要使用keep-alive功能则需要文件名里面添加name即可。
+```ts
+/**
+ * 需要通过路径转换成对应的name
+ * /admin/sysuser => SystemUser
+ * /content/article => ContentArticle
+ */
+defineOptions({
+  name: 'SystemUser'
+});
+```
+
 ## 🐵 关于封装
   1. 功能扩展，在原有的api上拓展。
   2. 功能整合，合并两个或两个以上组件的api。
   3. 样式统一，避免后期样式变动，导致牵一发而动全身。
-  4. 公共组件二次封装或常用组件使用**Basic**开头，便于区分。
+
+## 🤖 组件说明
+
+### 表单(BasicForm):
+| 属性名 | 必填 | 属性说明 |
+| --- | --- | --- |
+| name | 是 | 表单域字段，如果是嵌套格式，则为数组 |
+| label | 是 | 表单标签 |
+| rules | 否 | 表单规则，[参考模板](https://ant.design/components/form-cn/#components-form-demo-basic) |
+| component | 是 | 组件名，参考Antv名称，如Input |
+| componentProps | 否 | 组件属性，参考对应文档API，方法都是**on开头**，如dropdownVisibleChange要改为onDropdownVisibleChange |
+
+### 表格(BasicTable):
+| 属性名 | 必填 | 属性说明 |
+| --- | --- | --- |
+| id | 否 | 唯一标识(被某些特定的功能所依赖) |
+| data | 是 | 表格数据 |
+| columns | 是 | 列数据 |
+| isLoading | 否 | 加载动画 |
+| offsetHeight | 否 | 高度偏移差，当表格高度过高出现滚动条的时候使用 |
+| isResize | 否 | 是否开启监听窗口变化而更改高度 |
+
+### 分页器(BasicPagination):
+| 属性名 | 必填 | 属性说明 |
+| --- | --- | --- |
+| total | 否 | 数据总数 |
+| page | 是 | 当前页数 |
+| pageSize | 是 | 每页条数 |
+| isLoading | 否 | 加载动画 |
+
+### API下拉框(ApiSelect、ApiTreeSelect):
+| 属性名 | 必填 | 属性说明 |
+| --- | --- | --- |
+| value | 否 | 下拉框绑定值 |
+| componentProps | 否 | 下拉框值，[ApiSelect属性](https://www.antdv.com/components/select-cn)，[ApiTreeSelect属性](https://www.antdv.com/components/tree-select-cn) |
+| api | 是 | API接口 |
+| params | 否 | 接口参数 |
+| onDropdownVisibleChange | 否 | 展开下拉菜单的回调 |
+### 自定义组件
+#### 业务组件存放在`src/components/Business`目录下，每次新增组件想要在src/components/Business/index.tsx文件中引入。

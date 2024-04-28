@@ -1,52 +1,40 @@
-import type { IFormData } from '#/form'
-import type { IPageServerResult, IPaginationData } from '#/public'
-import { request } from '@/utils/request'
+import {request} from "@/servers/request";
+import {ServerResult} from "@/servers/request/types";
+import {FormData} from "#/form";
+import {PageServerResult, TableData} from "#/public";
 
 enum API {
   URL = '/v1/sysUser'
 }
 
-/**
- * 获取分页数据
- * @param data - 请求数据
- */
-export function getUserPage(data: Partial<IFormData> & IPaginationData) {
-  return request.get<IPageServerResult<IFormData[]>>(
-    `${API.URL}`,
-    { params: data }
-  )
+// 删除数据
+export function deleteUser(id: number) {
+  return request.delete<ServerResult>(`${API.URL}/${id}`);
 }
 
-/**
- * 根据ID获取数据
- * @param id - ID
- */
+// 更新数据
+export function updateUser(id: string, data: unknown) {
+  return request.put<ServerResult>(`${API.URL}/${id}`, data);
+}
+
+// 新增数据
+export function createUser(data: FormData) {
+  return request.post<ServerResult>(`${API.URL}`, data);
+}
+
+// 根据Id查询用户数据
 export function getUserById(id: string) {
-  return request.get(`${API.URL}/${id}`)
+  return request.get<ServerResult<FormData>>(`${API.URL}/${id}`);
 }
 
-/**
- * 新增数据
- * @param data - 请求数据
- */
-export function createUser(data: IFormData) {
-  return request.post(API.URL, data)
+// 分页获取用户数据
+export function getUserPage(data?: unknown) {
+  return request.get<PageServerResult<TableData[]>>(`${API.URL}`, {params: data});
 }
 
-/**
- * 修改数据
- * @param id - 修改id值
- * @param data - 请求数据
- */
-export function updateUser(id: string, data: IFormData) {
-  data['id'] = id
-  return request.put(`${API.URL}/${id}`, data)
-}
-
-/**
- * 删除
- * @param id - 删除id值
- */
-export function deleteUser(id: string) {
-  return request.delete(`${API.URL}/${id}`)
+// 查询用户列表
+export function getUserList() {
+  return request.get<ServerResult<FormData[]>>(
+    `${API.URL}/list`,
+  );
 }

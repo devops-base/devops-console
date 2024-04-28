@@ -1,54 +1,37 @@
-import type { IPermissions } from "@/pages/login/model"
-import authentication from "@/utils/authentication"
+import type { PermissionsData } from "@/pages/login/model";
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
+import {ADMIN_RULE} from "@/utils/config";
 
 /**
  * 授权参数转字符串数组
  * @param permissions - 授权值
  */
-export const permissionsToArray = (permissions: IPermissions[]): string[] => {
-  const res: string[] = []
+export const permissionsToArray = (permissions: PermissionsData[]): string[] => {
+  const res: string[] = [];
   for (let i = 0; i < permissions.length; i++) {
-    if (permissions[i]?.children?.length > 0) {
-      const { children  } = permissions[i]
-      for (let y =0; y< children.length;y++) {
-        res.push(children[y].path)
-      }
-    } else {
-      res.push(permissions[i].path)
+    const { id, operation } = permissions[i];
+    res.push(`/${id}`);
+    for (let y = 0; y < operation.length; y++) {
+      res.push(`/${id}/${operation[y]}`);
     }
   }
-  return res
-}
-
-/**
- *  用户菜单参数转数组
- * @param permissions - 授权值
- */
-export const menusToArray = (permissions: IPermissions[]): string[] => {
-  const res: string[] = []
-  for (let i = 0; i < permissions.length; i++) {
-    if (permissions[i]?.children?.length > 0) {
-      const { children  } = permissions[i]
-      for (let y =0; y< children.length;y++) {
-        res.push(children[y].path)
-      }
-    } else {
-      res.push(permissions[i].path)
-    }
-  }
-  return res
-}
+  return res;
+};
 
 /**
  * 检测是否有权限
  * @param value - 检测值
- * @param permissions - 权限
  */
-export const checkPermission = (value: string, permissions: string[]): boolean => {
-  if (!permissions || permissions.length === 0) return false
-  return permissions.includes(value)
-}
+export const checkPermission = (value: string): boolean => {
+  const userStore = useUserStore();
+  const { menus } = storeToRefs(userStore);
 
-export const CheckPermission = (value: string, permission: string[]): boolean => {
- return  authentication({ requiredPermissions: {actions: value} }, permission)
-}
+  // 排除管理员
+  if (menus.value.join('') === ADMIN_RULE) {
+    return true;
+  }
+
+  if (!menus || menus.value?.length === 0) return false;
+  return menus.value?.includes(value);
+};

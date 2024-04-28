@@ -1,18 +1,16 @@
+import { message } from 'ant-design-vue';
 import { getLocalInfo, removeLocalInfo } from '@/utils/local';
 import { TOKEN } from '@/utils/config';
+import { router } from '@/router';
+import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 import AxiosRequest from './request';
-import {message} from "antd"
 
 // 生成环境所用的接口
-const prefixUrl = "/api";
-const baseURL = process.env.NODE_ENV !== 'development' ? prefixUrl : '/api';
+const baseURL = '/api';
 
 // 请求配置
 export const request = creteRequest(baseURL);
-
-// TODO：创建多个请求
-// export const newRequest = creteRequest('/test');
 
 /**
  * 创建请求
@@ -40,25 +38,34 @@ function creteRequest(url: string) {
       responseInterceptors(res) {
         const { data } = res;
         // 权限不足
-        if (data?.code === 401) {
-          message.error('权限不足，请重新登录！').then();
+        if (data?.code === 401 && !location.href?.includes('/login?state=401')) {
           removeLocalInfo(TOKEN);
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1000);
-          handleError(data?.message);
+          const { setPermissions } = useUserStore();
+          setPermissions([]);
+          router.push('/login?state=401').then();
+          handleError(data?.message || '权限不足，请重新登录！');
           return res;
         }
 
         // 错误处理
         if (data?.code !== 200) {
-          handleError(data?.message);
+          handleError(data?.msg);
           return res;
         }
 
         return res;
       },
       responseInterceptorsCatch(err) {
+        // 权限不足
+        if ((err?.response?.status === 401 || err.response?.data?.code === 401) && !location.href?.includes('/login')) {
+          removeLocalInfo(TOKEN);
+          const { setPermissions } = useUserStore();
+          setPermissions([]);
+          router.push('/login?state=401').then();
+          handleError(err.response?.data?.message || '权限不足，请重新登录！');
+          return err;
+        }
+
         // 取消重复请求则不报错
         if(axios.isCancel(err)) {
           err.data = err.data || {};

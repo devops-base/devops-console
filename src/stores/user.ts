@@ -1,54 +1,74 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { defineStore } from 'pinia';
+import {UserInfoResult} from "@/pages/login/model";
 
-export const userSlice = createSlice({
-  name: 'user',
-  initialState: {
-    // 用户菜单
+interface UserDataInfo extends UserInfoResult {
+}
+
+interface StateData {
+  menus: string[];
+  userInfo: UserDataInfo;
+}
+
+export const useUserStore = defineStore({
+  id: 'user',
+  state: () => ({
+    // 用户权限
     menus: [],
     // 用户信息
     userInfo: {
-      avatar: '',
-      buttons: undefined,
+      userId: 0,
+      userName: '',
       deptId: -1,
-      introduction: '',
+      role: '',
       name: '',
       permissions: [],
-      role: undefined,
-      userId: undefined,
-      userName: ''
+      avatar: '',
+      buttons: [],
+      introduction: '',
     }
-  },
-  reducers: {
-    /** 设置用户信息 */
-    setUserInfo: (state, action) => {
-      state.userInfo = action.payload
+  } as unknown as StateData),
+  actions: {
+    /**
+     * 设置用户权限
+     * @param permissions - 权限
+     */
+    setPermissions(permissions: string[]) {
+      this.menus = permissions;
     },
-    /** 设置权限 */
-    setPermissions: (state, action) => {
-      state.menus = action.payload
+    /**
+     * 获取用户权限
+     */
+    getPermissions() {
+      return this.menus;
     },
-    /** 清除用户信息 */
-    clearInfo: (state) => {
-      state.userInfo = {
+    /**
+     * 设置用户信息
+     * @param userInfo - 用户值
+     */
+    setUserInfo(userInfo: UserDataInfo) {
+      this.userInfo = userInfo;
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo() {
+      return this.userInfo;
+    },
+    /**
+     * 清除用户信息
+     */
+    clearInfo() {
+      this.userInfo = {
         avatar: '',
-        buttons: undefined,
+        buttons: [],
         deptId: -1,
         introduction: '',
         name: '',
         permissions: [],
-        role: undefined,
-        userId: undefined,
-        userName: ''
-      } // 清空用户信息
-      state.menus = [] // 清空菜单
+        role: [],
+        userId: -1,
+        userName: '',
+      };
     }
-  }
-})
-
-export const {
-  setUserInfo,
-  setPermissions,
-  clearInfo
-} = userSlice.actions
-
-export default userSlice.reducer
+  },
+});

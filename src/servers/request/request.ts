@@ -8,7 +8,6 @@ import type {
 import type {
   RequestInterceptors,
   CreateRequestConfig,
-  ServerResult
 } from './types';
 
 class AxiosRequest {
@@ -41,7 +40,12 @@ class AxiosRequest {
         }
 
         // 如果存在post数据
-        if (res.data && res.data?.[0] === '{' && res.data?.[res.data?.length - 1] === '}') {
+        if (typeof res.data === 'object') {
+          for (const key in res.data) {
+            url += `#${key}=${res.data[key]}`;
+          }
+        }
+        if (typeof res.data === 'string' && res.data?.[0] === '{' && res.data?.[res.data?.length - 1] === '}') {
           const obj = JSON.parse(res.data);
           for (const key in obj) {
             url += `#${key}=${obj[key]}`;
@@ -106,8 +110,8 @@ class AxiosRequest {
    * @param url - 链接
    * @param options - 参数
    */
-  get<T = object>(url: string, options = {}) {
-    return this.instance.get(url, options) as Promise<T>;
+  get<T = object>(url: string, options?: unknown) {
+    return this.instance.get(url, options || {}) as Promise<T>;
   }
   /**
    * post请求
@@ -115,8 +119,8 @@ class AxiosRequest {
    * @param options - 参数
    * @param config
    */
-  post<T = object>(url: string, options = {}, config?: AxiosRequestConfig<object>) {
-    return this.instance.post(url, options, config) as Promise<T>;
+  post<T = object>(url: string, options?: unknown, config?: AxiosRequestConfig<object>) {
+    return this.instance.post(url, options || {}, config) as Promise<T>;
   }
   /**
    * put请求
@@ -124,16 +128,16 @@ class AxiosRequest {
    * @param options - 参数
    * @param config
    */
-  put<T = object>(url: string, options = {}, config?: AxiosRequestConfig<object>) {
-    return this.instance.put(url, options, config) as Promise<ServerResult<T>>;
+  put<T = object>(url: string, options?: unknown, config?: AxiosRequestConfig<object>) {
+    return this.instance.put(url, options || {}, config) as Promise<T>;
   }
   /**
    * delete请求
    * @param url - 链接
    * @param options - 参数
    */
-  delete<T = object>(url: string, options = {}) {
-    return this.instance.delete(url, options) as Promise<ServerResult<T>>;
+  delete<T = object>(url: string, options?: unknown) {
+    return this.instance.delete(url, options || {}) as Promise<T>;
   }
 }
 
