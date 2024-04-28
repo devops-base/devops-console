@@ -79,40 +79,6 @@ export const MENU_ACTIONS: IConstant[] = [
   { label: '否', value: '1' }
 ];
 
-// 定时任务状态
-export const TASK_STATUS: IConstant[] = [
-  { label: '激活', value: '2'},
-  { label: '停止', value: '1'},
-];
-
-// 定时任务通知类型
-export const TASK_NOTIFY_TYPE: IConstant[] = [
-  { label: '永不通知', value: 1 },
-  { label: '失败通知', value: 2 },
-  { label: '全部通知', value: 3 }
-];
-
-// 脚本类型
-export const SCRIPT_TYPE: IConstant[] = [
-  { label: 'Bash', value: 'Bash' },
-  { label: 'Python', value: 'Python' },
-];
-
-// 任务执行状态
-export const TASK_EXECUTE_STATUS: IConstant[] = [
-  { label: '定时执行', value: 1 },
-  { label: '手动执行', value: 2 },
-  { label: '监控回调', value: 3 },
-];
-
-// 脚本执行状态
-export const TASK_STATUS_LIST: IConstant[] = [
-  { label: '执行失败', value: 1 },
-  { label: '执行中', value: 2 },
-  { label: '执行成功', value: 3 },
-  { label: '取消', value: 4 },
-];
-
 /*
 * 用户状态类型
 **/
