@@ -1,9 +1,9 @@
 {
-  "name": "job-console",
+  "name": "devops-console",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "http://git.tz.com/devops/job-console",
+  "homepage": "https://github.com/devops-base/devops-console",
   "scripts": {
     "dev": "vite --host --mode development",
     "build": "vue-tsc --noEmit && vite build --mode production",
